@@ -1,0 +1,20 @@
+ create procedure fine_cal(in sid varchar(20),in b varchar(20))
+    -> begin
+    -> declare fine_amt int default(0);
+    -> declare days int default(0);
+    -> declare d_o_p date;
+    ->  select return_date into d_o_p from Books where stud_id = sid and name = b;
+    ->  set days = round(to_days(curdate()) - to_days(cast(d_o_p as date)));
+    ->  if(days>0 and days<30) then
+    ->    set fine_amt = days*5;
+    ->  elseif(days>30) then
+    ->    set fine_amt = (days-30)*50 + 150;
+    ->  else
+    ->    set fine_amt = 0;
+    ->  end if;
+    ->  if(fine_amt>0) then
+    ->   insert into Fine values(sid,b,fine_amt,sysdate());
+    -> end if;
+    ->  update Student set books_on_rent = books_on_rent - 1 where id = sid;
+    -> end;
+    -> /
