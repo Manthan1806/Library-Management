@@ -10,12 +10,23 @@ import java.awt.event.*;
 
 import javax.swing.*;
 
+import javafx.*;
+import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.Stage;
+
 interface OnCallBack
 {
 	void onCallBack(String s);
 }
 
-public class library_management
+public class library_management extends Application
 {
 	public static void main(String [] args)
 	{
@@ -26,6 +37,59 @@ public class library_management
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);			//set screen with given size
 		frame.setVisible(true);  
 	}
+	
+	Set<String> news = new HashSet<>();
+    
+	public library_management(Set<String> set)
+	{
+		news = set;
+	}
+	
+	@Override
+    public void start(Stage stage) {
+ 
+        /*Hyperlink hyperlink = new Hyperlink("Go to Eclipse home page");
+ 
+        hyperlink.setOnAction(new EventHandler<ActionEvent>() {
+ 
+            @Override
+            public void handle(ActionEvent event) {
+                getHostServices().showDocument("https://eclipse.org");
+            }
+        });*/
+		FlowPane root = new FlowPane();
+        root.setPadding(new Insets(10));
+		
+		for(String s : news)
+		{
+			Hyperlink hyperlink = new Hyperlink(s);
+			 
+	        hyperlink.setOnAction(new EventHandler<ActionEvent>() {
+	 
+	            @Override
+	            public void handle(ActionEvent event) {
+	                getHostServices().showDocument(s);
+	            }
+	        });
+			root.getChildren().addAll(hyperlink);
+		}
+ 
+        Scene scene = new Scene(root);
+ 
+        stage.setTitle("Top Articles");
+ 
+        stage.setWidth(400);
+        stage.setHeight(200);
+ 
+        stage.setScene(scene);
+        stage.show();
+        
+    }
+    
+    public void launchStage()
+    {
+    	launch();	
+    }
 }
 
 class server extends JComponent
@@ -37,6 +101,8 @@ implements MouseListener,ActionListener
 	Student student = null;
 	Books books = null;
 	Fine fine = null;
+	JsoupGoogleSearch search = null;
+	library_management link = null;
 	OnCallBack ocb = null;
 	ThreadPool tp = null;
 	JButton new_user,add_info,buy,returnBook;
@@ -104,15 +170,47 @@ implements MouseListener,ActionListener
 			student = new Student(con);
 			books = new Books(con);
 			fine = new Fine(con);
+			search = new JsoupGoogleSearch();
+			
 		}
 		catch(Exception e)
 		{
 			System.out.println(e);
 		}
 	}
-	
+
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void mouseClicked(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void actionPerformed(java.awt.event.ActionEvent e) {
 		// TODO Auto-generated method stub
 		if(e.getSource() == new_user)
 		{
@@ -301,52 +399,39 @@ implements MouseListener,ActionListener
 			String b = JOptionPane.showInputDialog(null,"Enter Book name : ");
 			try 
 			{
+				Set<String> result = new HashSet<>();
+				Statement stmt = con.createStatement();
+				String s = "select category from library where name = '"+b+"';";
+				ResultSet rs = stmt.executeQuery(s);
+				try 
+				{
+					if(rs.next())
+					{
+						result = search.getLinks(rs.getString(1));
+					}
+				}
+				catch (IOException e1)
+				{
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				Double f = fine.fine(id, b, con);
 				if(f!=0)
 				{
-					String s = "You have crossed the return date. Please pay fine of "+f+" rupees";
-					JOptionPane.showMessageDialog(null, s);
+					String s1 = "You have crossed the return date. Please pay fine of "+f+" rupees";
+					JOptionPane.showMessageDialog(null, s1);
 				}
 				JOptionPane.showMessageDialog(null, "Book returned successfully");
-				student.delete(id, con);
 				books.delete(b, id, con);
+				link = new library_management(result);
+				link.launchStage();
 			}
 			catch (SQLException e1) 
 			{
 				e1.printStackTrace();
-			}
-			
+			}	
 		}
 
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
 		
 	}
 }
@@ -530,4 +615,3 @@ class ThreadPool
 		executor.shutdown();
 	}
 }
-
