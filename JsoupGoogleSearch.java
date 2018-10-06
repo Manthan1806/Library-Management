@@ -53,11 +53,6 @@ public class JsoupGoogleSearch {
                 result.add(getDomainName(attr1));
             }
         }
-
-        for (String el : result) 
-        {
-            System.out.println(el);
-        }
         
         return result;
     }

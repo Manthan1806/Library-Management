@@ -26,75 +26,27 @@ interface OnCallBack
 	void onCallBack(String s);
 }
 
-public class library_management extends Application
+public class library_management
 {
+	public static Set<String> result = new HashSet<>();
+	public static String category;
 	public static void main(String [] args)
 	{
 		JFrame frame = new JFrame("LIBRARY");
-		frame.add( new server());
+		frame.add( new server(args));
 		frame.getContentPane().setBackground(Color.DARK_GRAY	);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);    //to close when exit button is pressed
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);			//set screen with given size
 		frame.setVisible(true);  
 	}
 	
-	Set<String> news = new HashSet<>();
-    
-	public library_management(Set<String> set)
-	{
-		news = set;
-	}
 	
-	@Override
-    public void start(Stage stage) {
- 
-        /*Hyperlink hyperlink = new Hyperlink("Go to Eclipse home page");
- 
-        hyperlink.setOnAction(new EventHandler<ActionEvent>() {
- 
-            @Override
-            public void handle(ActionEvent event) {
-                getHostServices().showDocument("https://eclipse.org");
-            }
-        });*/
-		FlowPane root = new FlowPane();
-        root.setPadding(new Insets(10));
-		
-		for(String s : news)
-		{
-			Hyperlink hyperlink = new Hyperlink(s);
-			 
-	        hyperlink.setOnAction(new EventHandler<ActionEvent>() {
-	 
-	            @Override
-	            public void handle(ActionEvent event) {
-	                getHostServices().showDocument(s);
-	            }
-	        });
-			root.getChildren().addAll(hyperlink);
-		}
- 
-        Scene scene = new Scene(root);
- 
-        stage.setTitle("Top Articles");
- 
-        stage.setWidth(400);
-        stage.setHeight(200);
- 
-        stage.setScene(scene);
-        stage.show();
-        
-    }
-    
-    public void launchStage()
-    {
-    	launch();	
-    }
 }
 
 class server extends JComponent
 implements MouseListener,ActionListener
 {
+	String [] args;
 	user<Integer> uid1 = null;
 	user<String> uid2 = null;
 	library<Double> obj1 = null;
@@ -102,7 +54,7 @@ implements MouseListener,ActionListener
 	Books books = null;
 	Fine fine = null;
 	JsoupGoogleSearch search = null;
-	library_management link = null;
+	HyperlinkDemo link = null;
 	OnCallBack ocb = null;
 	ThreadPool tp = null;
 	JButton new_user,add_info,buy,returnBook;
@@ -110,8 +62,9 @@ implements MouseListener,ActionListener
 	JTable table;
 	Connection con = null;
 	JScrollPane scrollPane;
-	public server()
+	public server(String [] args)
 	{
+		this.args = args;
 		try
 		{
 			panel1 = new JPanel();
@@ -399,7 +352,7 @@ implements MouseListener,ActionListener
 			String b = JOptionPane.showInputDialog(null,"Enter Book name : ");
 			try 
 			{
-				Set<String> result = new HashSet<>();
+				
 				Statement stmt = con.createStatement();
 				String s = "select category from library where name = '"+b+"';";
 				ResultSet rs = stmt.executeQuery(s);
@@ -407,7 +360,8 @@ implements MouseListener,ActionListener
 				{
 					if(rs.next())
 					{
-						result = search.getLinks(rs.getString(1));
+						library_management.result = search.getLinks(rs.getString(1));
+						library_management.category = rs.getString(1);
 					}
 				}
 				catch (IOException e1)
@@ -423,8 +377,8 @@ implements MouseListener,ActionListener
 				}
 				JOptionPane.showMessageDialog(null, "Book returned successfully");
 				books.delete(b, id, con);
-				link = new library_management(result);
-				link.launchStage();
+				link = new HyperlinkDemo();
+				link.launchStage(args);
 			}
 			catch (SQLException e1) 
 			{
