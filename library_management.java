@@ -47,8 +47,8 @@ implements MouseListener,ActionListener
 	HyperlinkDemo link = null;
 	OnCallBack ocb = null;
 	ThreadPool tp = null;
-	JButton new_user,add_info,buy,returnBook,Trends;
-	JPanel panel,panel1,panel2,panel3,panel4,panel5,panel6,panel7,panel8,panel9,panel10,img_pan;
+	JButton newUser,addInfo,buy,returnBook,Trends,yourBooks;
+	JPanel panel,panel1,panel2,panel3,panel4,panel5,panel6,panel7,panel8,panel9,panel10,panel11,img_pan;
 	JTable table;
 	Connection con = null;
 	JScrollPane scrollPane;
@@ -81,24 +81,28 @@ implements MouseListener,ActionListener
 			panel9 = new JPanel();
 			panel9.setBounds(0,240,250,50);
 			panel9.setBackground(new Color(165,70,30));
-			panel10 = new JPanel();
+			panel11 = new JPanel();
+			panel11.setBounds(0,300,250,50);
+			panel11.setBackground(new Color(165,70,30));
 			img_pan = new JPanel();
 			img_pan.setBounds(0,0,1920,1080);
-			new_user = new JButton("New User");
-			new_user.setBounds(0, 0, 100, 30);
-			add_info = new JButton("Add Information");
-			add_info.setBounds(0,60,200,30);
+			newUser = new JButton("New User");
+			//newUser.setBounds(0, 0, 100, 30);
+			addInfo = new JButton("Add Information");
+			//addInfo.setBounds(0,60,200,30);
 			buy = new JButton("Issue a Book");
-			buy.setBounds(0,100,100,30);
+			//buy.setBounds(0,100,100,30);
 			returnBook = new JButton("Return a book");
 			//returnBook.setBounds(0, 400, 100, 30);
 			Trends = new JButton("Current Trends");
 			//Trends.setBounds(0,);
-			panel1.add(new_user);
-			panel3.add(add_info);
+			yourBooks = new JButton("Your Books");
+			panel1.add(newUser);
+			panel3.add(addInfo);
 			panel5.add(buy);
 			panel7.add(returnBook);
 			panel9.add(Trends);
+			panel11.add(yourBooks);
 			add(panel1);  
 			add(panel2);
 			add(panel3);
@@ -107,13 +111,15 @@ implements MouseListener,ActionListener
 			add(panel5);
 			add(panel7);
 			add(panel9);
+			add(panel11);
 			add(panel);
 			panel4.setVisible(false);
-			new_user.addActionListener(this);
-			add_info.addActionListener(this);
+			newUser.addActionListener(this);
+			addInfo.addActionListener(this);
 			buy.addActionListener(this);
 			returnBook.addActionListener(this);
 			Trends.addActionListener(this);
+			yourBooks.addActionListener(this);
 			addMouseListener(this);
 			
 			try {
@@ -179,7 +185,7 @@ implements MouseListener,ActionListener
 	@Override
 	public void actionPerformed(java.awt.event.ActionEvent e) {
 		// TODO Auto-generated method stub
-		if(e.getSource() == new_user)
+		if(e.getSource() == newUser)
 		{
 			String n = JOptionPane.showInputDialog(null, "User Name : ");
 			String t = JOptionPane.showInputDialog(null, "Id type?\n1.Integer\n2.String\n\n");
@@ -299,7 +305,7 @@ implements MouseListener,ActionListener
 			panel4.remove(sp);
 			panel4.setVisible(false);
 		}
-		else if(e.getSource()==add_info)
+		else if(e.getSource()==addInfo)
 		{
 			try
 			{
@@ -414,7 +420,33 @@ implements MouseListener,ActionListener
 			HyperlinkDemo link = new HyperlinkDemo();
 			link.launchStage(args);
 		}
-		
+		else if(e.getSource() == yourBooks) 
+		{
+			String id = JOptionPane.showInputDialog(null,"Enter id : ");
+			try
+			{
+				Statement stmt = con.createStatement();
+				String s = "select * from books where stud_id = '"+id+"';";
+				ResultSet rs = stmt.executeQuery(s);
+				String ans = "";
+				while(rs.next())
+				{
+					ans = ans + "Book : "+rs.getString(1)+" return date : "+rs.getString(3)+"\n";
+				}
+				if(ans.length()!=0)
+				{
+					JOptionPane.showMessageDialog(null, ans);
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(null, "No Books Issued");
+				}
+			}
+			catch (SQLException e1) 
+			{
+				e1.printStackTrace();
+			}
+		}
 	}
 }
 
