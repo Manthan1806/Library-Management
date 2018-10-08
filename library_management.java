@@ -47,7 +47,7 @@ implements MouseListener,ActionListener
 	HyperlinkDemo link = null;
 	OnCallBack ocb = null;
 	ThreadPool tp = null;
-	JButton new_user,add_info,buy,returnBook;
+	JButton new_user,add_info,buy,returnBook,Trends;
 	JPanel panel,panel1,panel2,panel3,panel4,panel5,panel6,panel7,panel8,panel9,panel10,img_pan;
 	JTable table;
 	Connection con = null;
@@ -70,7 +70,7 @@ implements MouseListener,ActionListener
 			panel3.setBounds(0, 60, 250, 50);
 			panel3.setBackground(new Color(165,70,30));
 			panel4 = new JPanel();
-			panel4.setBounds(750,0,600,350);
+			panel4.setBounds(950,0,600,350);
 			panel4.setBackground(Color.LIGHT_GRAY);
 			panel5 = new JPanel();
 			panel5.setBounds(0,120,250,50);
@@ -78,6 +78,9 @@ implements MouseListener,ActionListener
 			panel7 = new JPanel();
 			panel7.setBounds(0,180,250,50);
 			panel7.setBackground(new Color(165,70,30));
+			panel9 = new JPanel();
+			panel9.setBounds(0,240,250,50);
+			panel9.setBackground(new Color(165,70,30));
 			panel10 = new JPanel();
 			img_pan = new JPanel();
 			img_pan.setBounds(0,0,1920,1080);
@@ -88,11 +91,14 @@ implements MouseListener,ActionListener
 			buy = new JButton("Issue a Book");
 			buy.setBounds(0,100,100,30);
 			returnBook = new JButton("Return a book");
-			returnBook.setBounds(0, 400, 100, 30);
+			//returnBook.setBounds(0, 400, 100, 30);
+			Trends = new JButton("Current Trends");
+			//Trends.setBounds(0,);
 			panel1.add(new_user);
 			panel3.add(add_info);
 			panel5.add(buy);
 			panel7.add(returnBook);
+			panel9.add(Trends);
 			add(panel1);  
 			add(panel2);
 			add(panel3);
@@ -100,12 +106,14 @@ implements MouseListener,ActionListener
 			//add(panel10);
 			add(panel5);
 			add(panel7);
+			add(panel9);
 			add(panel);
 			panel4.setVisible(false);
 			new_user.addActionListener(this);
 			add_info.addActionListener(this);
 			buy.addActionListener(this);
 			returnBook.addActionListener(this);
+			Trends.addActionListener(this);
 			addMouseListener(this);
 			
 			try {
@@ -360,21 +368,21 @@ implements MouseListener,ActionListener
 			{
 				
 				Statement stmt = con.createStatement();
-				String s = "select category from library where name = '"+b+"';";
-				ResultSet rs = stmt.executeQuery(s);
-				try 
-				{
-					if(rs.next())
-					{
-						library_management.result = search.getLinks(rs.getString(1));
-						library_management.category = rs.getString(1);
-					}
-				}
-				catch (IOException e1)
-				{
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+//				String s = "select category from library where name = '"+b+"';";
+//				ResultSet rs = stmt.executeQuery(s);
+//				try 
+//				{
+//					if(rs.next())
+//					{
+//						library_management.result = search.getLinks(rs.getString(1));
+//						library_management.category = rs.getString(1);
+//					}
+//				}
+//				catch (IOException e1)
+//				{
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
 				Double f = fine.fine(id, b, con);
 				if(f!=0)
 				{
@@ -383,15 +391,29 @@ implements MouseListener,ActionListener
 				}
 				JOptionPane.showMessageDialog(null, "Book returned successfully");
 				books.delete(b, id, con);
-				link = new HyperlinkDemo();
-				link.launchStage(args);
+//				link = new HyperlinkDemo();
+//				link.launchStage(args);
 			}
 			catch (SQLException e1) 
 			{
 				e1.printStackTrace();
 			}	
 		}
-
+		else if(e.getSource() == Trends)
+		{
+			String s = JOptionPane.showInputDialog(null,"Enter category : ");
+			try 
+			{
+				library_management.result = search.getLinks(s);
+			}
+			catch (IOException e1)
+			{
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			HyperlinkDemo link = new HyperlinkDemo();
+			link.launchStage(args);
+		}
 		
 	}
 }
