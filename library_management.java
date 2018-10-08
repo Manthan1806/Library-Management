@@ -1,5 +1,4 @@
 import java.util.*;
-import java.util.Date;
 import java.io.*;
 import java.sql.*;
 import java.util.concurrent.*;
@@ -7,19 +6,10 @@ import java.util.concurrent.*;
 import com.mysql.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
-
-import javafx.*;
-import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.layout.FlowPane;
-import javafx.stage.Stage;
 
 interface OnCallBack
 {
@@ -34,7 +24,7 @@ public class library_management
 	{
 		JFrame frame = new JFrame("LIBRARY");
 		frame.add( new server(args));
-		frame.getContentPane().setBackground(Color.DARK_GRAY	);
+		//frame.getContentPane().setBackground(Color.DARK_GRAY);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);    //to close when exit button is pressed
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);			//set screen with given size
 		frame.setVisible(true);  
@@ -58,7 +48,7 @@ implements MouseListener,ActionListener
 	OnCallBack ocb = null;
 	ThreadPool tp = null;
 	JButton new_user,add_info,buy,returnBook;
-	JPanel panel1,panel2,panel3,panel4,panel5,panel6,panel7,panel8,panel9,panel10;
+	JPanel panel,panel1,panel2,panel3,panel4,panel5,panel6,panel7,panel8,panel9,panel10,img_pan;
 	JTable table;
 	Connection con = null;
 	JScrollPane scrollPane;
@@ -67,51 +57,67 @@ implements MouseListener,ActionListener
 		this.args = args;
 		try
 		{
+			panel = new JPanel();
+			panel.setBounds(0,0,250,1000);
+			panel.setBackground(Color.BLACK);
 			panel1 = new JPanel();
-			panel1.setBounds(0, 0, 200, 350);
-			panel1.setBackground(Color.GREEN);
+			panel1.setBounds(0, 0, 250, 50);
+			panel1.setBackground(new Color(165,70,30));
 			panel2 = new JPanel();
-			panel2.setBounds(250, 0, 200, 350);
-			panel2.setBackground(Color.RED);
+			panel2.setBounds(250, 0, 1440, 5);
+			panel2.setBackground(Color.BLACK);
 			panel3 = new JPanel();
-			panel3.setBounds(500, 0, 200, 350);
-			panel3.setBackground(Color.BLUE);
+			panel3.setBounds(0, 60, 250, 50);
+			panel3.setBackground(new Color(165,70,30));
 			panel4 = new JPanel();
 			panel4.setBounds(750,0,600,350);
 			panel4.setBackground(Color.LIGHT_GRAY);
 			panel5 = new JPanel();
-			panel5.setBounds(0, 400, 200, 350);
-			panel9 = new JPanel();
-			panel9.setBounds(1400, 0, 150, 1000);
-			panel9.setBackground(Color.ORANGE);
+			panel5.setBounds(0,120,250,50);
+			panel5.setBackground(new Color(165,70,30));
+			panel7 = new JPanel();
+			panel7.setBounds(0,180,250,50);
+			panel7.setBackground(new Color(165,70,30));
 			panel10 = new JPanel();
-			panel10.setBounds(750,0,600,350);
-			panel10.setBackground(Color.LIGHT_GRAY);
+			img_pan = new JPanel();
+			img_pan.setBounds(0,0,1920,1080);
 			new_user = new JButton("New User");
 			new_user.setBounds(0, 0, 100, 30);
 			add_info = new JButton("Add Information");
-			add_info.setBounds(300,0,200,30);
+			add_info.setBounds(0,60,200,30);
 			buy = new JButton("Issue a Book");
-			buy.setBounds(700,0,100,30);
+			buy.setBounds(0,100,100,30);
 			returnBook = new JButton("Return a book");
 			returnBook.setBounds(0, 400, 100, 30);
 			panel1.add(new_user);
-			panel2.add(add_info);
-			panel3.add(buy);
-			panel5.add(returnBook);
+			panel3.add(add_info);
+			panel5.add(buy);
+			panel7.add(returnBook);
 			add(panel1);  
 			add(panel2);
 			add(panel3);
 			add(panel4);
-			add(panel9);
-			add(panel10);
+			//add(panel10);
 			add(panel5);
+			add(panel7);
+			add(panel);
 			panel4.setVisible(false);
 			new_user.addActionListener(this);
 			add_info.addActionListener(this);
 			buy.addActionListener(this);
 			returnBook.addActionListener(this);
 			addMouseListener(this);
+			
+			try {
+				BufferedImage myPicture = ImageIO.read(new File("resized_background.jpg"));
+				JLabel picLabel = new JLabel(new ImageIcon(myPicture));
+				picLabel.setBounds(0, 0, 1440, 1080);
+				img_pan.add(picLabel);
+			}
+			catch(Exception E) {
+				E.printStackTrace();
+			}
+			add(img_pan);
 			Class.forName("com.mysql.jdbc.Driver");
 			con = DriverManager.getConnection("jdbc:mysql://localhost:3306/assignments","root","password");
 			obj1 = new library<Double>(con);
