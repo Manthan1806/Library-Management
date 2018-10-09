@@ -19,9 +19,11 @@ interface OnCallBack
 public class library_management
 {
 	public static Set<String> result = new HashSet<>();
-	public static String category;
+	public static String Address,Subject,Message;
 	public static void main(String [] args)
 	{
+		Subject = "Book is Available";
+		Message = "The book you had requested for is available now";
 		JFrame frame = new JFrame("LIBRARY");
 		frame.add( new server(args));
 		//frame.getContentPane().setBackground(Color.DARK_GRAY);
@@ -45,10 +47,12 @@ implements MouseListener,ActionListener
 	Fine fine = null;
 	JsoupGoogleSearch search = null;
 	HyperlinkDemo link = null;
+	IssueRequest request = null;
+	SwingEmailSender ses = null;
 	OnCallBack ocb = null;
 	ThreadPool tp = null;
-	JButton newUser,addInfo,buy,returnBook,Trends,yourBooks;
-	JPanel panel,panel1,panel2,panel3,panel4,panel5,panel6,panel7,panel8,panel9,panel10,panel11,img_pan;
+	JButton newUser,addInfo,buy,returnBook,Trends,yourBooks,issueRequest;
+	JPanel panel,panel1,panel2,panel3,panel4,panel5,panel6,panel7,panel8,panel9,panel10,panel11,panel13,img_pan;
 	JTable table;
 	Connection con = null;
 	JScrollPane scrollPane;
@@ -84,6 +88,9 @@ implements MouseListener,ActionListener
 			panel11 = new JPanel();
 			panel11.setBounds(0,300,250,50);
 			panel11.setBackground(new Color(165,70,30));
+			panel13 = new JPanel();
+			panel13.setBounds(0,360,250,50);
+			panel13.setBackground(new Color(165,70,30));
 			img_pan = new JPanel();
 			img_pan.setBounds(0,0,1920,1080);
 			newUser = new JButton("New User");
@@ -97,12 +104,14 @@ implements MouseListener,ActionListener
 			Trends = new JButton("Current Trends");
 			//Trends.setBounds(0,);
 			yourBooks = new JButton("Your Books");
+			issueRequest = new JButton("Issue Request");
 			panel1.add(newUser);
 			panel3.add(addInfo);
 			panel5.add(buy);
 			panel7.add(returnBook);
 			panel9.add(Trends);
 			panel11.add(yourBooks);
+			panel13.add(issueRequest);
 			add(panel1);  
 			add(panel2);
 			add(panel3);
@@ -112,6 +121,7 @@ implements MouseListener,ActionListener
 			add(panel7);
 			add(panel9);
 			add(panel11);
+			add(panel13);
 			add(panel);
 			panel4.setVisible(false);
 			newUser.addActionListener(this);
@@ -120,6 +130,7 @@ implements MouseListener,ActionListener
 			returnBook.addActionListener(this);
 			Trends.addActionListener(this);
 			yourBooks.addActionListener(this);
+			issueRequest.addActionListener(this);
 			addMouseListener(this);
 			
 			try {
@@ -144,7 +155,8 @@ implements MouseListener,ActionListener
 			books = new Books(con);
 			fine = new Fine(con);
 			search = new JsoupGoogleSearch();
-			
+			request = new IssueRequest(con);
+			ses = new SwingEmailSender();
 		}
 		catch(Exception e)
 		{
@@ -321,6 +333,7 @@ implements MouseListener,ActionListener
 						String a = JOptionPane.showInputDialog(null, "Enter author : ");
 						String n1 = JOptionPane.showInputDialog(null, "Enter price : ");
 						String n2 = JOptionPane.showInputDialog(null, "Enter stock : ");
+						String c = JOptionPane.showInputDialog(null, "Enter category : ");
 						Integer p=0;
 						Double s=0.0;
 						if(n2!=null)
@@ -331,7 +344,7 @@ implements MouseListener,ActionListener
 						{
 							s = Double.parseDouble(n1);
 						}
-						obj1.accept(b,a,s,p);
+						obj1.accept(b,a,s,p,c);
 					}
 				}
 				else if(t.equals("String"))
@@ -343,6 +356,7 @@ implements MouseListener,ActionListener
 						String a = JOptionPane.showInputDialog(null, "Enter author : ");
 						String n1 = JOptionPane.showInputDialog(null, "Enter price : ");
 						String n2 = JOptionPane.showInputDialog(null, "Enter stock : ");
+						String c = JOptionPane.showInputDialog(null, "Enter category : ");
 						Integer p=0;
 						Double s=0.0;
 						if(n2!=null)
@@ -353,7 +367,7 @@ implements MouseListener,ActionListener
 						{
 							s = Double.parseDouble(n1);
 						}
-						obj1.accept(b,a,s,p);
+						obj1.accept(b,a,s,p,c);
 					}
 				}
 				else
@@ -396,7 +410,14 @@ implements MouseListener,ActionListener
 					JOptionPane.showMessageDialog(null, s1);
 				}
 				JOptionPane.showMessageDialog(null, "Book returned successfully");
+				obj1.update(b);
 				books.delete(b, id, con);
+				request.sendEmail(b, con);
+				if(library_management.Address.length()!=0)
+				{
+					ses.send();
+				}
+				library_management.Address = "";
 //				link = new HyperlinkDemo();
 //				link.launchStage(args);
 			}
@@ -447,6 +468,20 @@ implements MouseListener,ActionListener
 				e1.printStackTrace();
 			}
 		}
+		else if(e.getSource() == issueRequest)
+		{
+			String id = JOptionPane.showInputDialog(null,"Enter id : ");
+			String b = JOptionPane.showInputDialog(null,"Enter book name : ");
+			try
+			{
+				request.issue(con, id, b);
+			} 
+			catch (SQLException e1) 
+			{
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
 	}
 }
 
@@ -459,7 +494,7 @@ class library<T>
 		Statement stmt = con.createStatement();
 		stmt.executeUpdate("create table if not exists library(name varchar(20),author varchar(20),price float,stock int);");
 	}
-	public void accept(String s1, String s2, Double d, Integer i) throws SQLException
+	public void accept(String s1, String s2, Double d, Integer i,String c) throws SQLException
 	{
 		// TODO Auto-generated method stub
 		Statement pre = con.createStatement();
@@ -474,7 +509,7 @@ class library<T>
 		else
 		{
 			Statement stmt = con.createStatement();
-			String s = "insert into library values('"+s1+"','"+s2+"',"+d+","+i+");";
+			String s = "insert into library values('"+s1+"','"+s2+"',"+d+","+i+",'"+c+"');";
 			stmt.executeUpdate(s);
 		}
 	}
@@ -493,9 +528,9 @@ class library<T>
 			String s2 = "update library set stock = "+copies+" where name = '"+b+"';";
 			Statement stmt2 = con.createStatement();
 			stmt2.executeUpdate(s2);
-			String s3 = "delete from library where stock = 0;";
-			Statement stmt3 = con.createStatement();
-			stmt3.executeUpdate(s3);
+//			String s3 = "delete from library where stock = 0;";
+//			Statement stmt3 = con.createStatement();
+//			stmt3.executeUpdate(s3);
 			return ("Book has been issued");
 		}
 		else
@@ -521,6 +556,12 @@ class library<T>
 		return true;*/
 	}
 	
+	public void update(String b)throws SQLException
+	{
+		Statement stmt1 = con.createStatement();
+		String s = "update library set stock = stock + 1 where name = '"+b+"';";
+		stmt1.executeUpdate(s);
+	}
 }
 class user<T>
 {
