@@ -20,7 +20,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-public class SwingEmailSender extends JFrame {
+public class SwingEmailSender extends JFrame
+{
 	private ConfigUtility configUtil = new ConfigUtility();
 	
 	private JMenuBar menuBar = new JMenuBar();
@@ -41,7 +42,8 @@ public class SwingEmailSender extends JFrame {
 	
 	private GridBagConstraints constraints = new GridBagConstraints();
 	
-	public SwingEmailSender() {
+	public SwingEmailSender()
+	{
 		super("Swing E-mail Sender Program");
 		
 		// set up layout
@@ -57,7 +59,8 @@ public class SwingEmailSender extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
 	}
 
-	private void setupMenu() {
+	private void setupMenu() 
+	{
 		menuItemSetting.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -71,7 +74,8 @@ public class SwingEmailSender extends JFrame {
 		setJMenuBar(menuBar);		
 	}
 	
-	private void setupForm() {
+	private void setupForm() 
+	{
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		add(labelTo, constraints);
@@ -116,9 +120,75 @@ public class SwingEmailSender extends JFrame {
 		add(new JScrollPane(textAreaMessage), constraints);		
 	}
 	
-	private void buttonSendActionPerformed(ActionEvent event) {
+	private void buttonSendActionPerformed(ActionEvent event) 
+	{
 		if (!validateFields()) {
 			return;
+		}
+		
+//		String toAddress = library_management.Address;
+//		String subject = library_management.Subject;
+//		String message = library_management.Message;
+//		
+//		File[] attachFiles = null;
+//		
+//		if (!filePicker.getSelectedFilePath().equals("")) {
+//			File selectedFile = new File(filePicker.getSelectedFilePath());
+//			attachFiles = new File[] {selectedFile};
+//		}
+//		
+//		try {
+//			Properties smtpProperties = configUtil.loadProperties();
+//			EmailUtility.sendEmail(smtpProperties, toAddress, subject, message, attachFiles);
+//			
+//			JOptionPane.showMessageDialog(this, 
+//					"The e-mail has been sent successfully!");
+//			
+//		} catch (Exception ex) {
+//			JOptionPane.showMessageDialog(this, 
+//					"Error while sending the e-mail: " + ex.getMessage(),
+//					"Error", JOptionPane.ERROR_MESSAGE);
+//		}
+	}
+	
+	private boolean validateFields() 
+	{
+		if (fieldTo.getText().equals("")) {
+			JOptionPane.showMessageDialog(this, 
+					"Please enter To address!",
+					"Error", JOptionPane.ERROR_MESSAGE);
+			fieldTo.requestFocus();
+			return false;
+		}
+		
+		if (fieldSubject.getText().equals("")) {
+			JOptionPane.showMessageDialog(this, 
+					"Please enter subject!",
+					"Error", JOptionPane.ERROR_MESSAGE);
+			fieldSubject.requestFocus();
+			return false;
+		}
+		
+		if (textAreaMessage.getText().equals("")) {
+			JOptionPane.showMessageDialog(this, 
+					"Please enter message!",
+					"Error", JOptionPane.ERROR_MESSAGE);
+			textAreaMessage.requestFocus();
+			return false;
+		}	
+		return true;
+	}
+	
+	public void send()
+	{
+		// set look and feel to system dependent
+		try
+		{
+			//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
 		}
 		
 		String toAddress = library_management.Address;
@@ -144,50 +214,12 @@ public class SwingEmailSender extends JFrame {
 					"Error while sending the e-mail: " + ex.getMessage(),
 					"Error", JOptionPane.ERROR_MESSAGE);
 		}
-	}
-	
-	private boolean validateFields() {
-		if (fieldTo.getText().equals("")) {
-			JOptionPane.showMessageDialog(this, 
-					"Please enter To address!",
-					"Error", JOptionPane.ERROR_MESSAGE);
-			fieldTo.requestFocus();
-			return false;
-		}
 		
-		if (fieldSubject.getText().equals("")) {
-			JOptionPane.showMessageDialog(this, 
-					"Please enter subject!",
-					"Error", JOptionPane.ERROR_MESSAGE);
-			fieldSubject.requestFocus();
-			return false;
-		}
-		
-		if (textAreaMessage.getText().equals("")) {
-			JOptionPane.showMessageDialog(this, 
-					"Please enter message!",
-					"Error", JOptionPane.ERROR_MESSAGE);
-			textAreaMessage.requestFocus();
-			return false;
-		}
-		
-		return true;
-	}
-	
-	public void send()
-	{
-		// set look and feel to system dependent
-		try {
-			//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				new SwingEmailSender().setVisible(true);
-			}
-		});
+//		SwingUtilities.invokeLater(new Runnable() {
+//			@Override
+//			public void run() {
+//				//new SwingEmailSender().setVisible(true);
+//			}
+//		});
 	}
 }
