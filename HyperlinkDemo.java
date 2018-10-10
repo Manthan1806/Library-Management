@@ -1,4 +1,5 @@
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javafx.application.Application;
@@ -27,18 +28,19 @@ public class HyperlinkDemo extends Application
         });*/
 		FlowPane root = new FlowPane();
         root.setPadding(new Insets(10));
-		for(String s : library_management.result)
+		for(Entry<String,String> s : library_management.result.entrySet())
 		{
-			Hyperlink hyperlink = new Hyperlink(s);
+			Hyperlink hyperlink = new Hyperlink(s.getKey());
 			 
 	        hyperlink.setOnAction(new EventHandler<ActionEvent>() {
-	 
+	        
 	            @Override
 	            public void handle(ActionEvent event) {
-	                getHostServices().showDocument(s);
+	                getHostServices().showDocument(s.getValue());
 	            }
 	        });
-			root.getChildren().addAll(hyperlink);
+			System.out.println(hyperlink);
+	        root.getChildren().addAll(hyperlink);
 		}
  
         Scene scene = new Scene(root);

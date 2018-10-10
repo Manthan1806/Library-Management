@@ -18,7 +18,7 @@ interface OnCallBack
 
 public class library_management
 {
-	public static Set<String> result = new HashSet<>();
+	public static Map<String,String> result = new HashMap<>();
 	public static String Address,Subject,Message;
 	public static void main(String [] args)
 	{

@@ -1,59 +1,48 @@
+
+
+
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class JsoupGoogleSearch {
+public class JsoupGoogleSearch{
 
-    private static Matcher matcher;
-    private static final String DOMAIN_NAME_PATTERN
-            = "([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,15}";
-    private static Pattern patrn = Pattern.compile(DOMAIN_NAME_PATTERN);
+	public static final String GOOGLE_SEARCH_URL = "https://www.google.com/search";
+	public Map<String,String> getLinks(String s) throws IOException {
+		//Taking search term input from console
+		Scanner scanner = new Scanner(System.in);
+		//System.out.println("Please enter the search term.");
+		String searchTerm = s;//scanner.nextLine();
+		//System.out.println("Please enter the number of results. Example: 5 10 20");
+		int num = 10;//scanner.nextInt();
+		scanner.close();
+		
+		String searchURL = GOOGLE_SEARCH_URL + "?q="+searchTerm+"&num="+num;
+		//without proper User-Agent, we will get 403 error
+		Document doc = Jsoup.connect(searchURL).userAgent("Mozilla/5.0").get();
+		
+		//below will print HTML data, save it to a file and open in browser to compare
+		//System.out.println(doc.html());
+		
+		//If google search results HTML change the <h3 class="r" to <h3 class="r1"
+		//we need to change below accordingly
+		Elements results = doc.select("h3.r > a");
+		Map<String,String> map = new HashMap<String,String>();
+		for (Element result : results) 
+		{
+			String linkHref = result.attr("href");
+			String linkText = result.text();
+			//System.out.println("Text::" + linkText + ", URL::" + linkHref.substring(6, linkHref.indexOf("&")));
+			map.put(linkText,linkHref.substring(7, linkHref.indexOf("&")));
+		}
+		
+		return map;
+	}
 
-    public static String getDomainName(String url) {
-
-        String domainName = "";
-        matcher = patrn.matcher(url);
-        
-        if (matcher.find()) {
-            domainName = matcher.group(0).toLowerCase().trim();
-        }
-        
-        return domainName;
-    }
-
-    public Set<String> getLinks(String s) throws IOException {
-
-        String query = s;
-
-        String url = "https://www.google.com/search?q=" + query + "&num=10";
-
-        Document doc = Jsoup
-                .connect(url)
-                .userAgent("Jsoup client")
-                .timeout(5000).get();
-
-        Elements links = doc.select("a[href]");
-
-        Set<String> result = new HashSet<>();
-
-        for (Element link : links)
-        {
-            String attr1 = link.attr("href");
-            String attr2 = link.attr("class");
-            
-            if (!attr2.startsWith("_Zkb") && attr1.startsWith("/url?q=")) 
-            { 
-                result.add(getDomainName(attr1));
-            }
-        }
-        
-        return result;
-    }
 }
